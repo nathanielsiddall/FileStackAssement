@@ -5,17 +5,21 @@ const container = document.getElementById('listBox');
 
     const displayUploads = (results)=>{
 
+
+
         for (let i = 0; i < results.filesUploaded.length; i++){
 
         const fileData = results.filesUploaded[i];
         console.log(fileData);
 
+            if (['pdf', 'doc'].indexOf(fileData.mimetype.split('/')[1]) !== -1){
 
-        //todo: the options are not valid. figure out how to transform documents and make the thumbnail tab work with them.
-            let options = {"output=format":"png"};
-            client.transform(fileData.url, options);
+                let options = { output: { "format": "png" }};
 
-        if (['jpeg', 'png'].indexOf(fileData.mimetype.split('/')[1]) !== -1) {
+               const tranURL = client.transform(fileData.handle, options);
+                container.innerHTML += "<a href=\""+ fileData.url +"\" target=\"_blank\">" +fileData.filename +"<img src=\""+ tranURL +"\" height=\"100\" width=\"150\"></div></a>" ;
+
+            } else if (['jpeg', 'png'].indexOf(fileData.mimetype.split('/')[1]) !== -1) {
             container.innerHTML += "<a href=\""+ fileData.url +"\" target=\"_blank\">" +fileData.filename +"<img src=\""+ fileData.url +"\" height=\"100\" width=\"150\"></a>"
         }else container.innerHTML += "<a href=\""+ fileData.url +"\" target=\"_blank\">" +fileData.filename + "</a>"
     }};
@@ -53,8 +57,6 @@ open new tab with document Preview.
 You can sign up for a free account here: https://dev.filestack.com/signup/trial/
 And access our docs here: https://www.filestack.com/docs
 */
-
-
 
 
 
