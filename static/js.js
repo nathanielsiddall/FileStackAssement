@@ -1,14 +1,29 @@
-import {DBconn} from "../DBconn.js";
+// I aded the api script to the html rather than import because I was getting wierd errors on my machine. could be I don't understtand ES6 well enough.
 
 const client = filestack.init("AmzTJqxaPT1Ch6kK4YvKsz");
 
 const container = document.getElementById('listBox');
 
+const sendIt = (data)=>{
+    let xhr = new XMLHttpRequest();
+    xhr.open('POST', '/', true);
+    //Send the proper header information along with the request
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send(JSON.stringify(data));
+    console.log('xhr request process');
+};
 
 const displayUploads = (results)=>{
 
+    let fileData = {
+        url:"",
+        filename:"",
+        tranUrl:""
+
+    };
+    let postData = [];
+
     for (let i = 0; i < results.filesUploaded.length; i++){
-    let sqlQuery = "";
 
     const fileData = results.filesUploaded[i];
     console.log(fileData);
@@ -18,27 +33,30 @@ const displayUploads = (results)=>{
         let options = { output: { "format": "png" }};
 
         const tranURL = client.transform(fileData.handle, options);
+        fileData.filename = fileData.filename;
+        fileData.url = fileData.url;
+        fileData.tranUrl = tranURL;
 
         container.innerHTML += "<a href=\""+ fileData.url +"\" target=\"_blank\">" +fileData.filename +"<img src=\""+ tranURL +
         "\" height=\"100\" width=\"150\"></div></a>";
 
-        sqlQuery = "INSERT INTO uploadHistory (filename, url, transformedURL) " +
-        "VALUES('" +fileData.filename + "','" + fileData.url+ "','" + tranURL+"')";
-
     }
     else if (['jpeg', 'png'].indexOf(fileData.mimetype.split('/')[1]) !== -1) {
 
+        fileData.filename = fileData.filename;
+        fileData.url = fileData.url;
+        fileData.tranUrl ="";
         container.innerHTML += "<a href=\""+ fileData.url +"\" target=\"_blank\">" +fileData.filename +
         "<img src=\""+ fileData.url +"\" height=\"100\" width=\"150\"></a>";
 
-        sqlQuery = "INSERT INTO uploadHistory (filename, url, transformedURL) " +
-        "VALUES('" +fileData.filename + "','" + fileData.url+ "','null')";
+    }
+    else container.innerHTML += "<a href=\""+ fileData.url +"\" target=\"_blank\">" +fileData.filename + "</a>"
 
-    }else container.innerHTML += "<a href=\""+ fileData.url +"\" target=\"_blank\">" +fileData.filename + "</a>"
+postData.push(fileData);
+}
 
-    DBconn(sqlQuery);
-
-}};
+sendIt(postData);
+};
 
 const picker = ()=> {
 
@@ -50,9 +68,11 @@ const picker = ()=> {
 
 })};
 
+const tester = document.getElementById('tester');
+tester.addEventListener("click", sendIt, false);
+
 
 const pickerButton = document.getElementById('pickerButton');
-
 pickerButton.addEventListener("click", picker, false);
 
 
